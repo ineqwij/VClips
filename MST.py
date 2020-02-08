@@ -6,7 +6,6 @@ import desImg
 
 clusterLog = open('clusterLog.txt', 'r')
 basePathDir = 'Videos/images/user'
-resSet = []
 nodes = []
 edges = []
 
@@ -59,6 +58,11 @@ def getWtinG(G, toID):
         if e.to() == toID:
             return e.wt()
 
+def getWtinEdges(frm, to):
+    for e in edges:
+        if e.frm() == frm and e.to() == to:
+            return e.wt()
+
 def findInList(nameList, id):
     for name in nameList:
         if name.find(id) != -1:
@@ -79,6 +83,7 @@ def dupRemv(l):
     return r
 
 def treeDeduce():
+    resSet = []
     resGraph = []
     for i in range(1, len(nodes)):
         tempMin = edges[len(edges)-1]
@@ -95,6 +100,8 @@ def treeDeduce():
     newedges = []
     newnodes = []
     ifCirc = 0
+    for n in nodes:
+        n.devis()
     for i in range(1, len(nodes)):
         if nodes[i].visited:
             continue
@@ -120,18 +127,16 @@ def treeDeduce():
             else:
                 str1 = findInList(nameList, e.frm())
                 str2 = findInList(nameList, e.to())
-                newedges.append(desImg.Edge(str1, str2, e.wt() - getWtinG(resGraph, e.to()), [e.frm(),e.to()], 3))
-
+                newedges.append(desImg.Edge(str1, str2, e.wt() - getWtinG(resGraph,e.to()), [e.frm(),e.to()], 3))
         elif e.frm() in circleSet and e.to() not in circleSet:
             str = findInList(nameList, e.frm())
             newedges.append(desImg.Edge(str, e.to(), e.wt(), [e.frm(), e.to()], 2))
         elif e.frm() not in circleSet and e.to() in circleSet:
             str = findInList(nameList, e.to())
-            newedges.append(desImg.Edge(e.frm(), str, e.wt() - getWtinG(resGraph, e.to()), [e.frm(), e.to()], 1))
+            newedges.append(desImg.Edge(e.frm(), str, e.wt() - getWtinG(resGraph,e.to()), [e.frm(), e.to()], 1))
         elif e.frm() not in circleSet and e.to() not in circleSet:
             newedges.append(e)
     print(len(newedges))
-    preRes = resGraph
     while ifCirc == 1:
         resGraph = []
         tempnewedges = newedges
@@ -205,6 +210,7 @@ def treeDeduce():
     resNodes = []
     resGraph = []
     ite = len(resSet)-1
+    totalWeight = 0
     while ite >= 0:
         g = resSet[ite]
         for e in g:
@@ -213,6 +219,7 @@ def treeDeduce():
                 if not c[1] in resNodes:
                     resNodes.append(c[1])
                     resGraph.append(c)
+                    totalWeight += getWtinEdges(c[0], c[1])
             elif f == 1:
                 b = 0
                 for id in resNodes:
@@ -226,6 +233,7 @@ def treeDeduce():
                 if not c[1] in resNodes:
                     resNodes.append(c[1])
                     resGraph.append(c)
+                    totalWeight += getWtinEdges(c[0], c[1])
             elif f == 2:
                 b = 0
                 for id in resNodes:
@@ -238,15 +246,27 @@ def treeDeduce():
                 if not c[1] in resNodes:
                     resNodes.append(c[1])
                     resGraph.append(c)
+                    totalWeight += getWtinEdges(c[0], c[1])
         ite -= 1
-    return resNodes, resGraph
+    return resNodes, resGraph, totalWeight
 
 for line in clusterLog.readlines():
     tempStr = line.replace(' ','').replace('\n','').split(':')
     # print(tempStr)
     getF(tempStr)
-n, e = treeDeduce()
-print("----------")
+n, e, w = treeDeduce()
+root = nodes[0].ImgID
+for i in range(1, len(nodes)):
+    root = nodes[i].ImgID
+    nodes[0], nodes[i] = nodes[i], nodes[0]
+    tn, te, tw = treeDeduce()
+    if tw < w:
+        n = tn
+        e = te
+        w = tw
+print("----------\n----------")
+print("root:", root)
+print("weight", w)
 for i in e:
     print("from: ", i[0], " || to: ", i[1])
 
