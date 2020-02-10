@@ -24,7 +24,23 @@ def getF(tempStr):
     IFrame = cv2.imread(fPath)
     descriptor = getSIFT(IFrame)
     node = desImg.Img(descriptor, tempStr[0], None)
-    if tempStr[1] == "1":
+    if tempStr[1] == "8":
+        for i in nodes:
+            preCostA_B = DstSIFT.getAvgDis(node.descriptor, i.descriptor)
+            preCostB_A = DstSIFT.getAvgDis(i.descriptor, node.descriptor)
+            edges.append(desImg.Edge(node.ImgID, i.ImgID, preCostA_B, [node.ImgID, i.ImgID], 0))
+            edges.append(desImg.Edge(i.ImgID, node.ImgID, preCostB_A, [i.ImgID, node.ImgID], 0))
+        nodes.append(node)
+    edges.sort()
+
+def test(tempStr):
+    dirPath = basePathDir + tempStr[0]
+    fPath = os.path.join(dirPath, 'core-01.jpeg')
+    print(fPath)
+    IFrame = cv2.imread(fPath)
+    descriptor = getSIFT(IFrame)
+    node = desImg.Img(descriptor, tempStr[0], None)
+    if tempStr[1] == "8":
         for i in nodes:
             preCostA_B = DstSIFT.getAvgDis(node.descriptor, i.descriptor)
             preCostB_A = DstSIFT.getAvgDis(i.descriptor, node.descriptor)
@@ -144,6 +160,8 @@ def treeDeduce():
         for i in range(0, len(tempnewnodes)):
             tempMin = tempnewedges[len(tempnewedges) - 1]
             for e in tempnewedges:
+                if e.frm() == nodes[0].ImgID:
+                    continue
                 if tempnewnodes[i].ImgID == e.to():
                     if e < tempMin:
                         tempMin = e
@@ -256,14 +274,14 @@ for line in clusterLog.readlines():
     getF(tempStr)
 n, e, w = treeDeduce()
 root = nodes[0].ImgID
-for i in range(1, len(nodes)):
+'''for i in range(1, len(nodes)):
     root = nodes[i].ImgID
     nodes[0], nodes[i] = nodes[i], nodes[0]
     tn, te, tw = treeDeduce()
     if tw < w:
         n = tn
         e = te
-        w = tw
+        w = tw'''
 print("----------\n----------")
 print("root:", root)
 print("weight", w)

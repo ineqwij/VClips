@@ -87,7 +87,7 @@ def getFromVideo():
 
 def getAllFrames():
     countFrames = 0
-    for i in range(1, 2):
+    for i in range(3, 4):
         for j in range(1, 11):
             tempStr = str(i) + '_' + str(j)
             dirPath = basePathIFrame + tempStr
@@ -109,7 +109,7 @@ def getAllFrames():
                 countFrames += 1
     return countFrames
 
-numV = getFromFrames()
+numV = getAllFrames()
 
 distortion = []
 for k in range(2,12):
@@ -131,7 +131,7 @@ for i in range(3,10):
     if prev - diff > x:
         x = prev - diff
         resK = i+1
-
+print(resK)
 KM = KMeans(n_clusters=resK, max_iter=500)
 KM.fit(data)
 
