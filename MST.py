@@ -160,8 +160,6 @@ def treeDeduce():
         for i in range(0, len(tempnewnodes)):
             tempMin = tempnewedges[len(tempnewedges) - 1]
             for e in tempnewedges:
-                if e.frm() == nodes[0].ImgID:
-                    continue
                 if tempnewnodes[i].ImgID == e.to():
                     if e < tempMin:
                         tempMin = e
